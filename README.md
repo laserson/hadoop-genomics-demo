@@ -54,7 +54,7 @@ This script will generate files that have lists of URLs for ingest.
     python bin/data_urls.py
     aws s3 cp sources/1kg.json s3://laserson-genomics/sources/
 
-Run the downloads
+Download 1000 Genome:
 
     python bin/download_to_s3.py -r emr \
         --ec2-instance-type cc2.8xlarge \
@@ -63,11 +63,15 @@ Run the downloads
         --ec2-key-pair-file ~/.ssh/laserson-genomics.pem \
         --ssh-tunnel-to-job-tracker \
         s3://laserson-genomics/sources/1kg.json
-    
-    python bin/download_to_s3.py -r emr \
-        --ec2-instance-type m1.medium \
-        --num-ec2-instances 1 \
-        --ec2-key-pair laserson-genomics\
-        --ec2-key-pair-file ~/.ssh/laserson-genomics.pem \
-        --ssh-tunnel-to-job-tracker \
-        s3://laserson-genomics/sources/test.json
+
+Download dbSNP from here with Aspera:
+
+    ftp://ftp.ncbi.nih.gov/snp/organisms/human_9606/VCF/00-All.vcf.gz
+    aws s3 cp 00-All.vcf.gz s3://laserson-genomics/dbSNP_raw/
+
+Download COSMIC:
+
+    wget ftp://ngs.sanger.ac.uk/production/cosmic/CosmicCodingMuts_v66_20130725.vcf.gz
+    wget ftp://ngs.sanger.ac.uk/production/cosmic/CosmicNonCodingVariants_v66_20130725.vcf.gz
+    aws s3 cp CosmicCodingMuts_v66_20130725.vcf.gz s3://laserson-genomics/COSMIC_raw/
+    aws s3 cp CosmicNonCodingVariants_v66_20130725.vcf.gz s3://laserson-genomics/COSMIC_raw/
