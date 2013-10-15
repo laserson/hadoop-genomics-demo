@@ -68,8 +68,6 @@ def report_progress_callback(transmitted, size):
     print >>sys.stderr, "Uploaded %i of %i" % (transmitted, size)
 
 
-
-
 class DownloadToS3(MRJob):
     
     HADOOP_INPUT_FORMAT = 'org.apache.hadoop.mapred.lib.NLineInputFormat'
@@ -89,7 +87,6 @@ class DownloadToS3(MRJob):
                                                 'sudo apt-get install python-pip',
                                                 'sudo pip install awscli',
                                                 'sudo pip install boto'])
-        
         return args
     
     def mapper(self, _, line):
@@ -109,30 +106,9 @@ class DownloadToS3(MRJob):
         log_to_stderr("Finished the download of %s to %s" % (source, intermediate))
         log_to_stderr(os.stat(intermediate))
         
-        # copy data to S3
-        # I create a new connection to S3 because the first one may have timed-out
-        # while waiting for the download
-        log_to_stderr("Reconnecting to s3 via boto for upload")
-        conn = boto.connect_s3()
-        log_to_stderr("reconnected.")
-        log_to_stderr("Looking up the bucket name")
-        bucket = conn.lookup(bucket_name)
-        if bucket is None:
-            bucket = conn.create_bucket(bucket_name)
-        log_to_stderr("have the correct bucket")
-        log_to_stderr("creating new Key for %s" % key_name)
-        key = boto.s3.key.Key(bucket)
-        log_to_stderr("Created new key")
-        key.key = key_name
-        log_to_stderr("Set key name")
-        log_to_stderr("Starting upload to s3")
-        with open(intermediate, 'rb') as ip:
-            key.set_contents_from_file(ip, replace=False, cb=report_progress_callback, num_cb=100)
-        log_to_stderr("upload to s3 finished.")
-        
-        # # upload to target location on S3
-        # p = subprocess.Popen('aws --region us-east-1 s3 cp %s %s' % (intermediate, target), shell=True, stdout=sys.stderr, stderr=sys.stderr)
-        # wait_to_finish_while_reporting_progress(p)
+        # upload to target location on S3
+        p = subprocess.Popen('aws --region us-east-1 s3 cp %s %s' % (intermediate, target), shell=True, stdout=sys.stderr, stderr=sys.stderr)
+        wait_to_finish_while_reporting_progress(p)
         
         return None
     
